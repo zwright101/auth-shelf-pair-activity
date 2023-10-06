@@ -20,6 +20,22 @@ router.get('/', (req, res) => {
  */
 router.post('/', (req, res) => {
   // endpoint functionality
+  console.log('/shelf POST route');
+  console.log(req.body);
+  if (req.isAuthenticated()){
+    console.log('user' , req.user);
+    let queryText = `INSERT INTO "item" ("description", "image_url", "user_id") VALUES ($1, $2, $3);`;
+    pool.query(queryText, [req.body.description, req.body.image_url, req.user.id])
+    .then((results) => {
+      res.sendStatus(201);
+    })
+    .catch((error) => {
+      console.log(error);
+      res.sendStatus(500)
+    })
+  } else {
+    res.sendStatus(401);
+  }
 });
 
 /**
@@ -27,6 +43,18 @@ router.post('/', (req, res) => {
  */
 router.delete('/:id', (req, res) => {
   // endpoint functionality
+  if (req.isAuthenticated()) {
+    const itemId = [req.params.id];
+    const queryText = `DELETE FROM "item" WHERE "id" = $1;`
+    pool.query(queryText, [itemId])
+    .then((result) => {
+      res.sendStatus(200)
+    })
+    .catch((error) => {
+      console.log(`Error in DELETE: ${error}`);
+      res.sendStatus(500)
+    })
+  }
 });
 
 module.exports = router;
